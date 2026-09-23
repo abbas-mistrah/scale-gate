@@ -1,0 +1,50 @@
+{
+  "scale1_version": "1.0",
+  "organization": { "name": "Northstar Group · Fictional demo", "sector": "Digital services & operations", "currency": "EUR" },
+  "use_case": {
+    "slug": "contract-review-agent",
+    "name": "Contract Review Agent",
+    "owner": "Alice Cohen",
+    "department": "Legal & Compliance",
+    "business_outcome": "Shorten first-pass review without delegating legal approval to the system.",
+    "stage": "controlled-scale",
+    "status": "active",
+    "risk_tier": "high",
+    "autonomy_level": 1,
+    "pilot_users": 22,
+    "target_users": 75,
+    "baseline_minutes": 96,
+    "treatment_minutes": 54,
+    "tasks_per_user_month": 18,
+    "labor_cost_hour": 82,
+    "setup_cost": 142000,
+    "annual_platform_cost": 76000,
+    "revenue_uplift": 110000,
+    "risk_avoidance": 180000,
+    "adoption": 0.61,
+    "attribution": 0.66,
+    "human_review_rate": 1,
+    "review_minutes": 18
+  },
+  "metrics": [
+    { "key": "task_success", "label": "End-to-end task success", "category": "quality", "value": 0.84, "target": 0.85, "unit": "ratio", "direction": "min", "sample_size": 78, "verified": true, "source": "Clause benchmark" },
+    { "key": "groundedness", "label": "Grounded clause mapping", "category": "quality", "value": 0.91, "target": 0.9, "unit": "ratio", "direction": "min", "sample_size": 78, "verified": true, "source": "Citation audit" },
+    { "key": "critical_error_rate", "label": "Critical miss rate", "category": "quality", "value": 0.018, "target": 0.02, "unit": "ratio", "direction": "max", "sample_size": 78, "verified": true, "source": "Legal review" },
+    { "key": "reliability", "label": "Workflow reliability", "category": "reliability", "value": 0.985, "target": 0.98, "unit": "ratio", "direction": "min", "sample_size": 620, "verified": true, "source": "Pilot telemetry" },
+    { "key": "latency_seconds", "label": "P95 analysis latency", "category": "efficiency", "value": 18.2, "target": 30, "unit": "seconds", "direction": "max", "sample_size": 620, "verified": true, "source": "Pilot telemetry" },
+    { "key": "cost_per_task", "label": "Model cost per document", "category": "economics", "value": 0.74, "target": 1.2, "unit": "EUR", "direction": "max", "sample_size": 620, "verified": true, "source": "Usage ledger" },
+    { "key": "pii_incidents", "label": "Confirmed privacy incidents", "category": "risk", "value": 0, "target": 0, "unit": "count", "direction": "max", "sample_size": 78, "verified": true, "source": "Security test" }
+  ],
+  "controls": [
+    { "key": "privacy-redaction", "domain": "Privacy", "title": "Document isolation and retention", "severity": "critical", "mandatory": true, "status": "pass", "owner": "Security Lead", "evidence": "Tenant isolation and deletion tested." },
+    { "key": "human-escalation", "domain": "Oversight", "title": "Qualified legal approval", "severity": "critical", "mandatory": true, "status": "pass", "owner": "General Counsel", "evidence": "Approval is technically mandatory." },
+    { "key": "fallback", "domain": "Reliability", "title": "Manual review remains available", "severity": "high", "mandatory": true, "status": "pass", "owner": "Legal Operations", "evidence": "Fallback verified." },
+    { "key": "monitoring", "domain": "Monitoring", "title": "Clause-level error monitoring", "severity": "high", "mandatory": true, "status": "pass", "owner": "Legal Operations", "evidence": "Weekly review established." },
+    { "key": "finance-validation", "domain": "Value", "title": "Finance validates the baseline", "severity": "high", "mandatory": true, "status": "pass", "owner": "Finance Partner", "evidence": "Value model reviewed." }
+  ],
+  "evidence": [
+    { "title": "Clause benchmark v1", "evidence_type": "evaluation", "domain": "Quality", "source": "Legal benchmark", "confidence": 0.86, "verified": true, "observed_at": "2026-09-10", "expires_at": "2026-12-09" },
+    { "title": "Reviewer override log", "evidence_type": "telemetry", "domain": "Oversight", "source": "Pilot audit trail", "confidence": 0.82, "verified": true, "observed_at": "2026-09-18", "expires_at": "2026-12-17" },
+    { "title": "Cycle-time baseline", "evidence_type": "baseline", "domain": "Value", "source": "Legal operations study", "confidence": 0.89, "verified": true, "observed_at": "2026-08-20", "expires_at": "2027-02-20" }
+  ]
+}

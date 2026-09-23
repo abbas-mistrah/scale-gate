@@ -1,0 +1,58 @@
+{
+  "scale1_version": "1.0",
+  "organization": {
+    "name": "Northstar Group · Fictional demo",
+    "sector": "Digital services & operations",
+    "geography": "Europe",
+    "risk_appetite": "balanced",
+    "currency": "EUR"
+  },
+  "use_case": {
+    "slug": "support-copilot",
+    "name": "Customer Support Copilot",
+    "owner": "Nora Diallo",
+    "department": "Customer Operations",
+    "description": "Retrieves policy, drafts answers and summarizes cases before human approval.",
+    "business_outcome": "Reduce handling time while maintaining resolution quality and protecting customer data.",
+    "stage": "pilot",
+    "status": "active",
+    "risk_tier": "high",
+    "autonomy_level": 2,
+    "pilot_users": 48,
+    "target_users": 420,
+    "baseline_minutes": 12.4,
+    "treatment_minutes": 7.8,
+    "tasks_per_user_month": 145,
+    "labor_cost_hour": 31,
+    "setup_cost": 185000,
+    "annual_platform_cost": 132000,
+    "revenue_uplift": 0,
+    "risk_avoidance": 90000,
+    "adoption": 0.68,
+    "attribution": 0.72,
+    "human_review_rate": 0.18,
+    "review_minutes": 1.6
+  },
+  "metrics": [
+    { "key": "task_success", "label": "End-to-end task success", "category": "quality", "value": 0.89, "target": 0.85, "unit": "ratio", "direction": "min", "sample_size": 240, "verified": true, "source": "Golden workflow set" },
+    { "key": "groundedness", "label": "Grounded answer rate", "category": "quality", "value": 0.93, "target": 0.9, "unit": "ratio", "direction": "min", "sample_size": 240, "verified": true, "source": "Citation audit" },
+    { "key": "critical_error_rate", "label": "Critical error rate", "category": "quality", "value": 0.014, "target": 0.02, "unit": "ratio", "direction": "max", "sample_size": 240, "verified": true, "source": "Risk-labelled evaluation set" },
+    { "key": "reliability", "label": "Workflow reliability", "category": "reliability", "value": 0.991, "target": 0.98, "unit": "ratio", "direction": "min", "sample_size": 4800, "verified": true, "source": "Pilot telemetry" },
+    { "key": "latency_seconds", "label": "P95 response latency", "category": "efficiency", "value": 3.4, "target": 5, "unit": "seconds", "direction": "max", "sample_size": 4800, "verified": true, "source": "Pilot telemetry" },
+    { "key": "cost_per_task", "label": "Model cost per task", "category": "economics", "value": 0.18, "target": 0.35, "unit": "EUR", "direction": "max", "sample_size": 4800, "verified": true, "source": "Usage ledger" },
+    { "key": "pii_incidents", "label": "Confirmed privacy incidents", "category": "risk", "value": 1, "target": 0, "unit": "count", "direction": "max", "sample_size": 240, "verified": true, "source": "Red-team run" }
+  ],
+  "controls": [
+    { "key": "privacy-redaction", "domain": "Privacy", "title": "PII redaction and output filtering", "severity": "critical", "mandatory": true, "status": "fail", "owner": "Privacy Lead", "evidence": "One synthetic identifier was reproduced during adversarial testing.", "framework_ref": "NIST AI RMF · Manage" },
+    { "key": "human-escalation", "domain": "Oversight", "title": "Human escalation path", "severity": "critical", "mandatory": true, "status": "pass", "owner": "Operations Lead", "evidence": "Escalation queue tested across 86 edge cases.", "framework_ref": "ISO/IEC 42001 · Operation" },
+    { "key": "fallback", "domain": "Reliability", "title": "Service fallback and rollback", "severity": "high", "mandatory": true, "status": "pass", "owner": "Platform Owner", "evidence": "Failover exercise completed in 74 seconds.", "framework_ref": "NIST AI RMF · Manage" },
+    { "key": "monitoring", "domain": "Monitoring", "title": "Production quality monitoring", "severity": "high", "mandatory": true, "status": "pass", "owner": "ML Platform", "evidence": "Quality, cost and drift thresholds are active.", "framework_ref": "NIST AI RMF · Measure" },
+    { "key": "finance-validation", "domain": "Value", "title": "Finance validates the baseline", "severity": "high", "mandatory": true, "status": "pass", "owner": "Finance Partner", "evidence": "Baseline and fully loaded cost model reviewed.", "framework_ref": "SCALE-1 · Value" }
+  ],
+  "evidence": [
+    { "title": "240-task golden evaluation", "evidence_type": "evaluation", "domain": "Quality", "source": "Controlled evaluation run", "confidence": 0.94, "verified": true, "observed_at": "2026-09-16", "expires_at": "2026-12-15" },
+    { "title": "Six-week pilot telemetry", "evidence_type": "telemetry", "domain": "Reliability", "source": "Local observability export", "confidence": 0.91, "verified": true, "observed_at": "2026-09-18", "expires_at": "2026-12-17" },
+    { "title": "Time-and-motion baseline", "evidence_type": "baseline", "domain": "Value", "source": "Operations measurement", "confidence": 0.88, "verified": true, "observed_at": "2026-08-28", "expires_at": "2027-02-28" },
+    { "title": "Privacy red-team report", "evidence_type": "risk", "domain": "Privacy", "source": "Internal red-team", "confidence": 0.97, "verified": true, "observed_at": "2026-09-17", "expires_at": "2026-12-16" }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "SCALE GATE — Enterprise AI Scale Decision Engine",
+  "short_name": "SCALE GATE",
+  "description": "From pilot promise to defensible scale.",
+  "start_url": "/#decision",
+  "display": "standalone",
+  "background_color": "#f7f1e7",
+  "theme_color": "#ff6a21",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Syntax and static checks
+        run: npm run check
+
+      - name: Engine and API tests
+        run: npm test
+
+      - name: Validate scale-ready reference contract
+        run: npm run validate:demo
+
+      - name: Exercise reusable SCALE GATE action
+        uses: ./
+        with:
+          contract: contracts/examples/demand-forecast.scale.json

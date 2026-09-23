@@ -1,0 +1,16 @@
+name: "SCALE GATE Evidence Check"
+description: "Validate a SCALE-1 contract and block promotion when enterprise AI evidence is not scale-ready."
+author: "Abbas Mistrah"
+branding:
+  icon: "shield"
+  color: "orange"
+inputs:
+  contract:
+    description: "Path to the SCALE-1 JSON contract"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Evaluate SCALE-1 evidence contract
+      shell: bash
+      run: node "${{ github.action_path }}/cli.js" check "${{ inputs.contract }}"

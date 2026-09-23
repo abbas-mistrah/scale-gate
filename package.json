@@ -1,0 +1,34 @@
+{
+  "name": "scale-gate",
+  "version": "1.0.0",
+  "description": "Enterprise AI evidence and scale decision engine — from pilot promise to defensible scale.",
+  "author": "Abbas Mistrah",
+  "license": "MIT",
+  "main": "server.js",
+  "bin": {
+    "scale-gate": "cli.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test --test-isolation=none",
+    "check": "node --check server.js && node --check cli.js && node --check src/database.js && node --check src/engine.js && node --check public/app.js",
+    "validate:demo": "node cli.js check contracts/examples/demand-forecast.scale.json"
+  },
+  "keywords": [
+    "enterprise-ai",
+    "ai-governance",
+    "ai-evaluation",
+    "value-engineering",
+    "responsible-ai",
+    "roi",
+    "decision-intelligence",
+    "nist-ai-rmf",
+    "iso-42001",
+    "sqlite",
+    "pwa"
+  ]
+}

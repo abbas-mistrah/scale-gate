@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ff6a21">
+  <meta name="description" content="SCALE GATE turns enterprise AI pilot evidence into defensible scale decisions.">
+  <title>SCALE GATE — Enterprise AI Scale Decision Engine</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#view">Skip to decision workspace</a>
+  <div class="livebar">
+    <div class="live-brand"><span></span>SCALE GATE <b>LIVE</b></div>
+    <div class="live-stat"><small>Decision</small><strong id="liveDecision">—</strong></div>
+    <div class="live-stat"><small>Evidence</small><strong id="liveEvidence">—</strong></div>
+    <div class="live-stat"><small>ROI</small><strong id="liveRoi">—</strong></div>
+    <div class="live-stat"><small>Hard blockers</small><strong id="liveBlockers">—</strong></div>
+    <time id="liveClock">—</time>
+  </div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-block">
+      <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div><strong>SCALE GATE</strong><span>AI EVIDENCE &amp; SCALE</span></div>
+      <button class="mobile-close" id="closeSidebar" aria-label="Close navigation">×</button>
+    </div>
+
+    <nav aria-label="Primary navigation">
+      <p>DECIDE</p>
+      <button class="nav-item active" data-view="decision"><span class="nav-icon">◇</span>Decision Room<kbd>1</kbd></button>
+      <button class="nav-item" data-view="evidence"><span class="nav-icon">⌁</span>Evidence Map<kbd>2</kbd></button>
+      <button class="nav-item" data-view="evaluation"><span class="nav-icon">⌇</span>Evaluation Lab<kbd>3</kbd></button>
+      <p>PROVE</p>
+      <button class="nav-item" data-view="value"><span class="nav-icon">↗</span>Value &amp; Scale<kbd>4</kbd></button>
+      <button class="nav-item" data-view="controls"><span class="nav-icon">⬡</span>Controls &amp; Autonomy<kbd>5</kbd></button>
+      <button class="nav-item" data-view="pack"><span class="nav-icon">▤</span>Decision Pack<kbd>6</kbd></button>
+      <p>STANDARD</p>
+      <button class="nav-item" data-view="protocol"><span class="nav-icon">{ }</span>SCALE-1 Protocol<kbd>7</kbd></button>
+    </nav>
+
+    <div class="policy-card">
+      <span>NON-NEGOTIABLE RULE</span>
+      <strong>Evidence before authority.</strong>
+      <p>A critical failure cannot be averaged away by ROI or a composite score.</p>
+    </div>
+    <div class="maker-card"><b>AM</b><div><strong>Abbas Mistrah</strong><span>AI Transformation &amp; Governance</span></div><i></i></div>
+  </aside>
+
+  <section class="workspace">
+    <header class="workspace-header">
+      <button class="menu-button" id="openSidebar" aria-label="Open navigation">☰</button>
+      <div class="breadcrumb"><b>SCALE GATE</b><span>/</span><strong id="currentLabel">Decision Room</strong></div>
+      <div class="header-actions">
+        <label class="case-picker"><span>USE CASE</span><select id="casePicker" aria-label="Select use case"></select></label>
+        <button class="button ghost" data-action="export-pack">Export pack</button>
+        <button class="button primary" data-action="run-gate"><span>▶</span> Run scale gate</button>
+      </div>
+    </header>
+    <main id="view" tabindex="-1"></main>
+  </section>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header><div><span id="modalEyebrow">SCALE GATE</span><h2 id="modalTitle">Dialog</h2><p id="modalSubtitle"></p></div><button data-action="close-modal" aria-label="Close">×</button></header>
+      <div class="modal-body" id="modalBody"></div>
+      <footer id="modalFooter"></footer>
+    </section>
+  </div>
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

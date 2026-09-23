@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If SCALE GATE or SCALE-1 supports your work, please cite this repository."
+title: "SCALE GATE: Enterprise AI Evidence & Scale Decision Engine"
+type: software
+authors:
+  - family-names: Mistrah
+    given-names: Abbas
+    orcid: "https://orcid.org/0009-0009-5944-585X"
+repository-code: "https://github.com/abbas-mistrah/scale-gate"
+url: "https://github.com/abbas-mistrah/scale-gate"
+license: MIT
+version: 1.0.0
+date-released: 2026-09-23
+keywords:
+  - enterprise AI
+  - AI governance
+  - AI evaluation
+  - value engineering
+  - scale decision

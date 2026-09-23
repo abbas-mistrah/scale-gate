@@ -1,0 +1,51 @@
+{
+  "scale1_version": "1.0",
+  "organization": { "name": "Northstar Group · Fictional demo", "sector": "Digital services & operations", "currency": "EUR" },
+  "use_case": {
+    "slug": "demand-forecast",
+    "name": "Demand Forecast Intelligence",
+    "owner": "Julien Moreau",
+    "department": "Operations",
+    "business_outcome": "Reduce avoidable capacity variance while keeping allocation decisions accountable.",
+    "stage": "scale-ready",
+    "status": "active",
+    "risk_tier": "medium",
+    "autonomy_level": 2,
+    "pilot_users": 36,
+    "target_users": 180,
+    "baseline_minutes": 210,
+    "treatment_minutes": 78,
+    "tasks_per_user_month": 4,
+    "labor_cost_hour": 56,
+    "setup_cost": 224000,
+    "annual_platform_cost": 148000,
+    "revenue_uplift": 520000,
+    "risk_avoidance": 260000,
+    "adoption": 0.76,
+    "attribution": 0.73,
+    "human_review_rate": 0.22,
+    "review_minutes": 12
+  },
+  "metrics": [
+    { "key": "task_success", "label": "Decision-ready forecast rate", "category": "quality", "value": 0.92, "target": 0.85, "unit": "ratio", "direction": "min", "sample_size": 410, "verified": true, "source": "Backtest and live pilot" },
+    { "key": "groundedness", "label": "Traceable recommendation rate", "category": "quality", "value": 0.96, "target": 0.9, "unit": "ratio", "direction": "min", "sample_size": 410, "verified": true, "source": "Evidence trace audit" },
+    { "key": "critical_error_rate", "label": "Material planning error rate", "category": "quality", "value": 0.008, "target": 0.02, "unit": "ratio", "direction": "max", "sample_size": 410, "verified": true, "source": "Backtest review" },
+    { "key": "reliability", "label": "Workflow reliability", "category": "reliability", "value": 0.996, "target": 0.98, "unit": "ratio", "direction": "min", "sample_size": 2100, "verified": true, "source": "Production shadow telemetry" },
+    { "key": "latency_seconds", "label": "P95 plan generation", "category": "efficiency", "value": 11.4, "target": 20, "unit": "seconds", "direction": "max", "sample_size": 2100, "verified": true, "source": "Telemetry" },
+    { "key": "cost_per_task", "label": "Model cost per plan", "category": "economics", "value": 1.82, "target": 3.5, "unit": "EUR", "direction": "max", "sample_size": 2100, "verified": true, "source": "Usage ledger" },
+    { "key": "pii_incidents", "label": "Confirmed privacy incidents", "category": "risk", "value": 0, "target": 0, "unit": "count", "direction": "max", "sample_size": 410, "verified": true, "source": "Security test" }
+  ],
+  "controls": [
+    { "key": "privacy-redaction", "domain": "Privacy", "title": "Approved operational data boundary", "severity": "critical", "mandatory": true, "status": "pass", "owner": "Data Owner", "evidence": "Field-level allowlist enforced." },
+    { "key": "human-escalation", "domain": "Oversight", "title": "Planner approval and override", "severity": "critical", "mandatory": true, "status": "pass", "owner": "Operations Director", "evidence": "Override and reason are logged." },
+    { "key": "fallback", "domain": "Reliability", "title": "Forecast fallback", "severity": "high", "mandatory": true, "status": "pass", "owner": "Platform Owner", "evidence": "Quarterly fallback drill passed." },
+    { "key": "monitoring", "domain": "Monitoring", "title": "Drift and impact monitoring", "severity": "high", "mandatory": true, "status": "pass", "owner": "Data Science Lead", "evidence": "Automated thresholds active." },
+    { "key": "finance-validation", "domain": "Value", "title": "Finance validates scale economics", "severity": "high", "mandatory": true, "status": "pass", "owner": "Finance Partner", "evidence": "Scenario model approved." }
+  ],
+  "evidence": [
+    { "title": "410-period backtest", "evidence_type": "evaluation", "domain": "Quality", "source": "Validated backtest", "confidence": 0.96, "verified": true, "observed_at": "2026-09-15", "expires_at": "2026-12-14" },
+    { "title": "Shadow-mode telemetry", "evidence_type": "telemetry", "domain": "Reliability", "source": "Production telemetry", "confidence": 0.93, "verified": true, "observed_at": "2026-09-18", "expires_at": "2026-12-17" },
+    { "title": "Operations baseline", "evidence_type": "baseline", "domain": "Value", "source": "Operations control study", "confidence": 0.91, "verified": true, "observed_at": "2026-08-25", "expires_at": "2027-02-25" },
+    { "title": "Finance scale model", "evidence_type": "finance", "domain": "Value", "source": "Finance approval", "confidence": 0.92, "verified": true, "observed_at": "2026-09-13", "expires_at": "2027-03-13" }
+  ]
+}

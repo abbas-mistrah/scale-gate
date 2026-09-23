@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://scale-gate.dev/schemas/scale-1.schema.json",
+  "title": "SCALE-1 Enterprise AI Evidence Contract",
+  "description": "Portable evidence contract for an enterprise AI scale decision.",
+  "type": "object",
+  "required": ["scale1_version", "use_case", "metrics", "controls", "evidence"],
+  "properties": {
+    "scale1_version": { "const": "1.0" },
+    "organization": { "type": "object", "additionalProperties": true },
+    "use_case": {
+      "type": "object",
+      "required": ["slug", "name", "owner", "department", "business_outcome", "risk_tier", "autonomy_level"],
+      "properties": {
+        "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "name": { "type": "string", "minLength": 3 },
+        "owner": { "type": "string", "minLength": 2 },
+        "department": { "type": "string", "minLength": 2 },
+        "business_outcome": { "type": "string", "minLength": 10 },
+        "risk_tier": { "enum": ["low", "medium", "high", "critical"] },
+        "autonomy_level": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "target_users": { "type": "integer", "minimum": 0 },
+        "baseline_minutes": { "type": "number", "minimum": 0 },
+        "treatment_minutes": { "type": "number", "minimum": 0 },
+        "tasks_per_user_month": { "type": "number", "minimum": 0 },
+        "labor_cost_hour": { "type": "number", "minimum": 0 },
+        "setup_cost": { "type": "number", "minimum": 0 },
+        "annual_platform_cost": { "type": "number", "minimum": 0 },
+        "adoption": { "type": "number", "minimum": 0, "maximum": 1 },
+        "attribution": { "type": "number", "minimum": 0, "maximum": 1 },
+        "human_review_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": true
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "label", "category", "value", "target", "unit", "direction", "sample_size", "verified", "source"],
+        "properties": {
+          "key": { "type": "string", "minLength": 2 },
+          "label": { "type": "string" },
+          "category": { "type": "string" },
+          "value": { "type": "number" },
+          "target": { "type": "number" },
+          "unit": { "type": "string" },
+          "direction": { "enum": ["min", "max"] },
+          "sample_size": { "type": "integer", "minimum": 0 },
+          "verified": { "type": "boolean" },
+          "source": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "domain", "title", "severity", "mandatory", "status"],
+        "properties": {
+          "key": { "type": "string" },
+          "domain": { "type": "string" },
+          "title": { "type": "string" },
+          "severity": { "enum": ["low", "medium", "high", "critical"] },
+          "mandatory": { "type": "boolean" },
+          "status": { "enum": ["pass", "fail", "missing"] },
+          "owner": { "type": "string" },
+          "evidence": { "type": "string" },
+          "framework_ref": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "evidence_type", "domain", "source", "confidence", "verified", "observed_at"],
+        "properties": {
+          "title": { "type": "string" },
+          "evidence_type": { "type": "string" },
+          "domain": { "type": "string" },
+          "source": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+          "verified": { "type": "boolean" },
+          "observed_at": { "type": "string", "format": "date" },
+          "expires_at": { "type": "string", "format": "date" }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}
