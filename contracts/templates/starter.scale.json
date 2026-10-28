@@ -1,0 +1,44 @@
+{
+  "scale1_version": "1.0",
+  "organization": { "name": "Your organization", "sector": "Your sector", "currency": "EUR" },
+  "use_case": {
+    "slug": "my-use-case",
+    "name": "My AI use case",
+    "owner": "Accountable owner (name or role)",
+    "department": "Owning department",
+    "business_outcome": "One sentence: the measurable business outcome this AI system must improve.",
+    "risk_tier": "medium",
+    "autonomy_level": 1,
+    "pilot_users": 10,
+    "target_users": 50,
+    "baseline_minutes": 30,
+    "treatment_minutes": 20,
+    "tasks_per_user_month": 20,
+    "labor_cost_hour": 50,
+    "setup_cost": 20000,
+    "annual_platform_cost": 10000,
+    "revenue_uplift": 0,
+    "risk_avoidance": 0,
+    "adoption": 0.6,
+    "attribution": 0.6,
+    "human_review_rate": 0.3,
+    "review_minutes": 5
+  },
+  "metrics": [
+    { "key": "task_success", "label": "Task success rate", "category": "quality", "value": 0, "target": 0.85, "unit": "ratio", "direction": "min", "sample_size": 0, "verified": false, "source": "Replace with your evaluation set" },
+    { "key": "groundedness", "label": "Grounded / traceable answer rate", "category": "quality", "value": 0, "target": 0.9, "unit": "ratio", "direction": "min", "sample_size": 0, "verified": false, "source": "Replace with your evaluation set" },
+    { "key": "critical_error_rate", "label": "Critical error rate", "category": "quality", "value": 1, "target": 0.02, "unit": "ratio", "direction": "max", "sample_size": 0, "verified": false, "source": "Replace with your error review" },
+    { "key": "reliability", "label": "Workflow reliability", "category": "reliability", "value": 0, "target": 0.98, "unit": "ratio", "direction": "min", "sample_size": 0, "verified": false, "source": "Replace with your telemetry" },
+    { "key": "latency_seconds", "label": "P95 latency", "category": "efficiency", "value": 0, "target": 20, "unit": "seconds", "direction": "max", "sample_size": 0, "verified": false, "source": "Replace with your telemetry" },
+    { "key": "cost_per_task", "label": "Model cost per task", "category": "economics", "value": 0, "target": 1, "unit": "EUR", "direction": "max", "sample_size": 0, "verified": false, "source": "Replace with your usage ledger" }
+  ],
+  "controls": [
+    { "key": "privacy-redaction", "domain": "Privacy", "title": "Approved personal-data boundary", "severity": "critical", "mandatory": true, "status": "missing", "owner": "Data Owner", "evidence": "" },
+    { "key": "human-escalation", "domain": "Oversight", "title": "Human approval, override and escalation", "severity": "critical", "mandatory": true, "status": "missing", "owner": "Business Owner", "evidence": "" },
+    { "key": "fallback", "domain": "Reliability", "title": "Tested fallback when the AI is unavailable or wrong", "severity": "high", "mandatory": true, "status": "missing", "owner": "Platform Owner", "evidence": "" },
+    { "key": "monitoring", "domain": "Monitoring", "title": "Quality, drift and impact monitoring", "severity": "high", "mandatory": true, "status": "missing", "owner": "Product Owner", "evidence": "" }
+  ],
+  "evidence": [
+    { "title": "Baseline measurement of the current process", "evidence_type": "baseline", "domain": "Value", "source": "Replace with your baseline study", "confidence": 0.5, "verified": false, "observed_at": "2026-01-01", "expires_at": "2026-07-01" }
+  ]
+}

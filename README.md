@@ -137,6 +137,17 @@ node cli.js check contracts/examples/demand-forecast.scale.json --json
 
 The CLI returns a non-zero exit code for an invalid contract or a `REJECT`, `REPAIR` or `RETIRE` decision. This lets the same policy block CI/CD promotion.
 
+### Gate your own use case
+
+Start from the starter contract and follow the [10-minute guide](docs/YOUR-FIRST-CONTRACT.md):
+
+```bash
+cp contracts/templates/starter.scale.json contracts/my-use-case.scale.json
+node cli.js check contracts/my-use-case.scale.json
+```
+
+The starter is valid but returns `REJECT` on purpose: its blockers and conditions are the checklist of evidence to collect.
+
 ## GitHub Action
 
 The repository is also a composite GitHub Action:
