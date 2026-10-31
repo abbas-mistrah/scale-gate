@@ -9,8 +9,8 @@ authors:
 repository-code: "https://github.com/abbas-mistrah/scale-gate"
 url: "https://github.com/abbas-mistrah/scale-gate"
 license: MIT
-version: 1.0.0
-date-released: 2026-09-23
+version: 1.1.0
+date-released: 2026-10-31
 keywords:
   - enterprise AI
   - AI governance
