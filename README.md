@@ -111,6 +111,14 @@ On Windows, the launcher starts the local service in the background and opens an
 powershell -ExecutionPolicy Bypass -File .\launch-scale-gate.ps1
 ```
 
+On macOS or Linux, the equivalent launcher checks the Node.js version, starts the service in the background (log in `data/server.log`) and opens the decision view in your browser:
+
+```bash
+./launch-scale-gate.sh
+```
+
+Set `PORT` or `HOST` to change the address, and `SCALE_GATE_NO_BROWSER=1` to skip opening the browser.
+
 ## SCALE-1 CLI
 
 Validate and evaluate a portable evidence contract:
