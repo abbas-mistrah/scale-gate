@@ -21,7 +21,11 @@ Exit codes:
 function readContract(file) {
   const absolute = path.resolve(process.cwd(), file);
   if (!fs.existsSync(absolute)) throw new Error(`File not found: ${absolute}`);
-  return JSON.parse(fs.readFileSync(absolute, 'utf8'));
+  try {
+    return JSON.parse(fs.readFileSync(absolute, 'utf8'));
+  } catch (error) {
+    throw new Error(`Not valid JSON: ${absolute} (${error.message})`);
+  }
 }
 
 function concise(result) {

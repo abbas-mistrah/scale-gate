@@ -270,7 +270,8 @@ The tests cover:
 - a complete `SCALE` decision;
 - fully loaded economics;
 - SCALE-1 validation;
-- local API and database integration.
+- local API and database integration;
+- the CLI exit-code contract used to block CI/CD promotion (`0` for `SCALE`/`CONDITIONAL_SCALE`, `1` for `REPAIR`, `REJECT`, invalid, missing or malformed contracts).
 
 ## Repository map
 
@@ -279,7 +280,7 @@ contracts/        SCALE-1 schema and executable examples
 docs/             architecture, methodology, protocol and screenshots
 public/           local-first web application and PWA shell
 src/              SQLite persistence and deterministic decision engine
-tests/            engine and API tests
+tests/            engine, API and CLI tests
 action.yml        reusable GitHub Action
 cli.js            SCALE-1 command-line gate
 server.js         local HTTP API and static server
