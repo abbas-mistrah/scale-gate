@@ -74,6 +74,16 @@ test('a structurally invalid contract fails with exit 1', () => {
   assert.match(result.stderr, /Invalid SCALE-1 contract/);
 });
 
+test('a null metric entry fails with exit 1 and a readable error, not a stack trace', () => {
+  const contract = JSON.parse(fs.readFileSync(path.join(root, 'contracts/examples/demand-forecast.scale.json'), 'utf8'));
+  contract.metrics.push(null);
+  const result = run('check', tempFile('null-metric.scale.json', JSON.stringify(contract)));
+  assert.equal(result.code, 1);
+  assert.match(result.stderr, /Invalid SCALE-1 contract/);
+  assert.match(result.stderr, /must be an object/);
+  assert.doesNotMatch(result.stderr, /TypeError/);
+});
+
 test('help exits 0, unknown command exits 1', () => {
   assert.equal(run('--help').code, 0);
   const unknown = run('deploy', 'contracts/examples/demand-forecast.scale.json');

@@ -22,4 +22,22 @@ test('local API exposes health, state and a SCALE-1 contract', async t => {
   assert.equal(contract.scale1_version, '1.0');
   assert.ok(contract.metrics.length >= 6);
   assert.ok(contract.controls.length >= 5);
+
+  const roundTrip = await fetch(`${base}/api/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(contract)
+  });
+  assert.equal(roundTrip.status, 200);
+  assert.equal((await roundTrip.json()).valid, true);
+
+  const broken = await fetch(`${base}/api/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...contract, metrics: [null] })
+  });
+  assert.equal(broken.status, 422);
+  const body = await broken.json();
+  assert.equal(body.valid, false);
+  assert.ok(body.errors.includes('metrics[0] must be an object.'));
 });

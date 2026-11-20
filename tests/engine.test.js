@@ -52,3 +52,50 @@ test('contract validation rejects duplicate metric keys', () => {
   assert.equal(validation.valid, false);
   assert.ok(validation.errors.some(error => error.includes('Duplicate metric key')));
 });
+
+test('contract validation reports non-object entries instead of throwing', () => {
+  const contract = fixture('demand-forecast.scale.json');
+  contract.metrics.push(null);
+  contract.controls.push('privacy');
+  contract.evidence.push(42);
+  const validation = validateContract(contract);
+  assert.equal(validation.valid, false);
+  assert.ok(validation.errors.includes(`metrics[${contract.metrics.length - 1}] must be an object.`));
+  assert.ok(validation.errors.includes(`controls[${contract.controls.length - 1}] must be an object.`));
+  assert.ok(validation.errors.includes(`evidence[${contract.evidence.length - 1}] must be an object.`));
+});
+
+test('contract validation rejects values that would be silently coerced', () => {
+  const contract = fixture('demand-forecast.scale.json');
+  contract.metrics[0].value = null;
+  contract.metrics[1].value = '';
+  contract.use_case.adoption = 1.4;
+  contract.use_case.setup_cost = -1000;
+  contract.evidence[0].confidence = 2;
+  const errors = validateContract(contract).errors;
+  assert.ok(errors.includes(`Metric ${contract.metrics[0].key} requires a numeric value.`));
+  assert.ok(errors.includes(`Metric ${contract.metrics[1].key} requires a numeric value.`));
+  assert.ok(errors.includes('use_case.adoption must be a number between 0 and 1.'));
+  assert.ok(errors.includes('use_case.setup_cost must be a non-negative number.'));
+  assert.ok(errors.includes('evidence[0] confidence must be a number between 0 and 1.'));
+});
+
+test('a mistyped control severity cannot bypass the critical-control blocker', () => {
+  const contract = fixture('support-copilot.scale.json');
+  const failing = contract.controls.find(item => item.key === 'privacy-redaction');
+  failing.severity = 'Critical';
+  const validation = validateContract(contract);
+  assert.equal(validation.valid, false);
+  assert.ok(validation.errors.some(error => error.startsWith('Control privacy-redaction severity must be one of')));
+  failing.severity = 'critical';
+  failing.status = 'passed';
+  assert.ok(validateContract(contract).errors.some(error => error.startsWith('Control privacy-redaction status must be one of')));
+});
+
+test('every shipped contract passes the stricter validation', () => {
+  for (const name of ['demand-forecast.scale.json', 'contract-review-agent.scale.json', 'support-copilot.scale.json']) {
+    assert.deepEqual(validateContract(fixture(name)), { valid: true, errors: [] }, name);
+  }
+  const starter = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'contracts', 'templates', 'starter.scale.json'), 'utf8'));
+  assert.deepEqual(validateContract(starter), { valid: true, errors: [] });
+});

@@ -255,26 +255,89 @@ function evaluateContract(contract, options = {}) {
   };
 }
 
+const isObject = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+const isNumber = value => typeof value === 'number' && Number.isFinite(value);
+
+// Fields the engine reads as numbers. A wrong type or range would otherwise be
+// silently coerced (null -> 0, 1.4 -> 1, -5 -> 0) and change the decision.
+const USE_CASE_FRACTIONS = ['adoption', 'attribution', 'human_review_rate'];
+const USE_CASE_NON_NEGATIVE = [
+  'target_users', 'tasks_per_user_month', 'baseline_minutes', 'treatment_minutes',
+  'labor_cost_hour', 'setup_cost', 'annual_platform_cost', 'review_minutes',
+  'revenue_uplift', 'risk_avoidance'
+];
+const CONTROL_SEVERITIES = Object.keys(SEVERITY_WEIGHT);
+const CONTROL_STATUSES = ['pass', 'fail', 'missing'];
+
 function validateContract(contract) {
   const errors = [];
-  if (!contract || typeof contract !== 'object') return { valid: false, errors: ['Contract must be a JSON object.'] };
+  if (!isObject(contract)) return { valid: false, errors: ['Contract must be a JSON object.'] };
   if (!String(contract.scale1_version || '').trim()) errors.push('scale1_version is required.');
-  if (!contract.use_case || typeof contract.use_case !== 'object') errors.push('use_case is required.');
+  if (!isObject(contract.use_case)) errors.push('use_case is required.');
+  const useCase = isObject(contract.use_case) ? contract.use_case : {};
   const requiredUseCase = ['slug', 'name', 'owner', 'department', 'business_outcome'];
   for (const field of requiredUseCase) {
-    if (!String(contract.use_case?.[field] || '').trim()) errors.push(`use_case.${field} is required.`);
+    if (!String(useCase[field] || '').trim()) errors.push(`use_case.${field} is required.`);
   }
+  for (const field of USE_CASE_FRACTIONS) {
+    if (field in useCase && !(isNumber(useCase[field]) && useCase[field] >= 0 && useCase[field] <= 1)) {
+      errors.push(`use_case.${field} must be a number between 0 and 1.`);
+    }
+  }
+  for (const field of USE_CASE_NON_NEGATIVE) {
+    if (field in useCase && !(isNumber(useCase[field]) && useCase[field] >= 0)) {
+      errors.push(`use_case.${field} must be a non-negative number.`);
+    }
+  }
+
   if (!Array.isArray(contract.metrics)) errors.push('metrics must be an array.');
   if (!Array.isArray(contract.controls)) errors.push('controls must be an array.');
   if (!Array.isArray(contract.evidence)) errors.push('evidence must be an array.');
+
   const keys = new Set();
-  for (const metric of contract.metrics || []) {
+  (Array.isArray(contract.metrics) ? contract.metrics : []).forEach((metric, index) => {
+    if (!isObject(metric)) {
+      errors.push(`metrics[${index}] must be an object.`);
+      return;
+    }
     if (!metric.key) errors.push('Every metric requires a key.');
     if (keys.has(metric.key)) errors.push(`Duplicate metric key: ${metric.key}.`);
     keys.add(metric.key);
-    if (!Number.isFinite(Number(metric.value))) errors.push(`Metric ${metric.key || '?'} requires a numeric value.`);
+    if (!isNumber(metric.value)) errors.push(`Metric ${metric.key || '?'} requires a numeric value.`);
+    if ('target' in metric && !isNumber(metric.target)) errors.push(`Metric ${metric.key || '?'} target must be a number.`);
     if (!['min', 'max'].includes(metric.direction)) errors.push(`Metric ${metric.key || '?'} direction must be min or max.`);
-  }
+    if ('sample_size' in metric && !(Number.isInteger(metric.sample_size) && metric.sample_size >= 0)) {
+      errors.push(`Metric ${metric.key || '?'} sample_size must be a non-negative integer.`);
+    }
+  });
+
+  (Array.isArray(contract.controls) ? contract.controls : []).forEach((control, index) => {
+    if (!isObject(control)) {
+      errors.push(`controls[${index}] must be an object.`);
+      return;
+    }
+    const label = control.key || `#${index}`;
+    if (!CONTROL_SEVERITIES.includes(control.severity)) {
+      errors.push(`Control ${label} severity must be one of ${CONTROL_SEVERITIES.join(', ')}.`);
+    }
+    if (!CONTROL_STATUSES.includes(control.status)) {
+      errors.push(`Control ${label} status must be one of ${CONTROL_STATUSES.join(', ')}.`);
+    }
+    if ('mandatory' in control && typeof control.mandatory !== 'boolean') {
+      errors.push(`Control ${label} mandatory must be true or false.`);
+    }
+  });
+
+  (Array.isArray(contract.evidence) ? contract.evidence : []).forEach((item, index) => {
+    if (!isObject(item)) {
+      errors.push(`evidence[${index}] must be an object.`);
+      return;
+    }
+    if ('confidence' in item && !(isNumber(item.confidence) && item.confidence >= 0 && item.confidence <= 1)) {
+      errors.push(`evidence[${index}] confidence must be a number between 0 and 1.`);
+    }
+  });
+
   return { valid: errors.length === 0, errors };
 }
 

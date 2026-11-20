@@ -269,7 +269,7 @@ The tests cover:
 - `CONDITIONAL_SCALE` behavior for incomplete evidence;
 - a complete `SCALE` decision;
 - fully loaded economics;
-- SCALE-1 validation;
+- SCALE-1 validation, including malformed entries and values that would otherwise be silently coerced (`null` metric values, ratios outside 0–1, negative costs, mistyped control severity or status);
 - local API and database integration;
 - the CLI exit-code contract used to block CI/CD promotion (`0` for `SCALE`/`CONDITIONAL_SCALE`, `1` for `REPAIR`, `REJECT`, invalid, missing or malformed contracts).
 
