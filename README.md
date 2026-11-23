@@ -270,7 +270,7 @@ The tests cover:
 - a complete `SCALE` decision;
 - fully loaded economics;
 - SCALE-1 validation, including malformed entries and values that would otherwise be silently coerced (`null` metric values, ratios outside 0–1, negative costs, mistyped control severity or status);
-- local API and database integration;
+- local API and database integration, including `400` answers for malformed requests and a server that keeps running after a malformed `Host` header;
 - the CLI exit-code contract used to block CI/CD promotion (`0` for `SCALE`/`CONDITIONAL_SCALE`, `1` for `REPAIR`, `REJECT`, invalid, missing or malformed contracts).
 
 ## Repository map

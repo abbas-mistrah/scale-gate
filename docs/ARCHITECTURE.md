@@ -114,6 +114,8 @@ Foreign keys are enabled. Metrics and controls are unique by `(use_case_id, key)
 | `GET` | `/api/use-cases/:id/decision-pack` | Download the Markdown decision record. |
 | `POST` | `/api/validate` | Validate and evaluate a supplied contract. |
 
+Errors are JSON `{ "error": "..." }`. Client mistakes return `400` (invalid JSON, a body that is not a JSON object, a missing use-case name or metric key, a malformed URL), `404` for an unknown route or id, `413` above 1.5 MB, and `422` from `/api/validate` for a contract that fails SCALE-1 validation. `500` is reserved for unexpected faults and does not echo internal messages.
+
 ## Decision data flow
 
 1. SQLite rows are reconstructed as one SCALE-1 contract.

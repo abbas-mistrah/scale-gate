@@ -47,22 +47,49 @@ function sendJson(response, status, payload) {
   send(response, status, JSON.stringify(payload, (_, value) => typeof value === 'bigint' ? Number(value) : value), 'application/json; charset=utf-8');
 }
 
+class HttpError extends Error {
+  constructor(status, message) {
+    super(message);
+    this.status = status;
+  }
+}
+
 function parseBody(request) {
   return new Promise((resolve, reject) => {
     let raw = '';
     request.on('data', chunk => {
       raw += chunk;
       if (raw.length > 1_500_000) {
-        reject(new Error('Payload too large'));
+        reject(new HttpError(413, 'Payload too large'));
         request.destroy();
       }
     });
     request.on('end', () => {
       if (!raw) return resolve({});
-      try { resolve(JSON.parse(raw)); } catch { reject(new Error('Invalid JSON')); }
+      try { resolve(JSON.parse(raw)); } catch { reject(new HttpError(400, 'Invalid JSON')); }
     });
     request.on('error', reject);
   });
+}
+
+// Mutation routes read named fields from the body, so null, arrays and
+// primitives are client errors (400), not server crashes (500).
+async function parseObjectBody(request) {
+  const body = await parseBody(request);
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    throw new HttpError(400, 'Request body must be a JSON object.');
+  }
+  return body;
+}
+
+// Required-field checks in the data layer are input errors, not server faults.
+function asClientError(operation) {
+  try {
+    return operation();
+  } catch (error) {
+    if (/ is required\.$/.test(error.message)) throw new HttpError(400, error.message);
+    throw error;
+  }
 }
 
 function decisionPack(contract, assessment) {
@@ -142,14 +169,14 @@ async function handleApi(request, response, url) {
   if (request.method === 'GET' && pathname === '/api/state') return sendJson(response, 200, getState());
 
   if (request.method === 'POST' && pathname === '/api/use-cases') {
-    const input = await parseBody(request);
-    const useCase = createUseCase(input);
+    const input = await parseObjectBody(request);
+    const useCase = asClientError(() => createUseCase(input));
     return sendJson(response, 201, { use_case: useCase, state: getState() });
   }
 
   const caseMatch = pathname.match(/^\/api\/use-cases\/(\d+)$/);
   if (caseMatch && request.method === 'PATCH') {
-    const item = updateUseCase(Number(caseMatch[1]), await parseBody(request));
+    const item = updateUseCase(Number(caseMatch[1]), await parseObjectBody(request));
     return item ? sendJson(response, 200, { use_case: item, state: getState() }) : sendJson(response, 404, { error: 'Use case not found.' });
   }
 
@@ -167,13 +194,14 @@ async function handleApi(request, response, url) {
 
   const metricMatch = pathname.match(/^\/api\/use-cases\/(\d+)\/metrics$/);
   if (metricMatch && request.method === 'POST') {
-    const metric = upsertMetric(Number(metricMatch[1]), await parseBody(request));
+    const input = await parseObjectBody(request);
+    const metric = asClientError(() => upsertMetric(Number(metricMatch[1]), input));
     return metric ? sendJson(response, 200, { metric, state: getState() }) : sendJson(response, 404, { error: 'Use case not found.' });
   }
 
   const controlMatch = pathname.match(/^\/api\/controls\/(\d+)$/);
   if (controlMatch && request.method === 'PATCH') {
-    const control = updateControl(Number(controlMatch[1]), await parseBody(request));
+    const control = updateControl(Number(controlMatch[1]), await parseObjectBody(request));
     return control ? sendJson(response, 200, { control, state: getState() }) : sendJson(response, 404, { error: 'Control not found.' });
   }
 
@@ -207,7 +235,13 @@ async function handleApi(request, response, url) {
 
 function serveStatic(response, url, method) {
   const requested = url.pathname === '/' ? '/index.html' : url.pathname;
-  const decoded = decodeURIComponent(requested).replace(/^[/\\]+/, '');
+  let decoded;
+  try {
+    decoded = decodeURIComponent(requested);
+  } catch {
+    return sendJson(response, 400, { error: 'Malformed URL.' });
+  }
+  decoded = decoded.replace(/^[/\\]+/, '');
   const filePath = path.resolve(publicDirectory, decoded);
   if (!filePath.startsWith(publicDirectory + path.sep) && filePath !== path.join(publicDirectory, 'index.html')) {
     return sendJson(response, 403, { error: 'Access denied.' });
@@ -229,15 +263,20 @@ function serveStatic(response, url, method) {
 }
 
 const server = http.createServer(async (request, response) => {
-  const url = new URL(request.url, `http://${request.headers.host || `${host}:${port}`}`);
   try {
+    // Routing only needs the path, so the Host header is never parsed: a
+    // malformed Host used to throw here, outside any handler, and stop the server.
+    const url = new URL(request.url, 'http://localhost');
     if (url.pathname.startsWith('/api/')) return await handleApi(request, response, url);
     if (!['GET', 'HEAD'].includes(request.method)) return sendJson(response, 405, { error: 'Method not allowed.' });
     return serveStatic(response, url, request.method);
   } catch (error) {
+    if (error instanceof HttpError) {
+      if (!response.headersSent && !response.destroyed) sendJson(response, error.status, { error: error.message });
+      return;
+    }
     console.error(error);
-    const status = error.message === 'Payload too large' ? 413 : error.message === 'Invalid JSON' ? 400 : 500;
-    return sendJson(response, status, { error: error.message || 'Internal error.' });
+    if (!response.headersSent && !response.destroyed) sendJson(response, 500, { error: 'Internal error.' });
   }
 });
 
