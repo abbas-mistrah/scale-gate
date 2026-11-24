@@ -145,6 +145,29 @@ node cli.js check contracts/examples/demand-forecast.scale.json --json
 
 The CLI returns a non-zero exit code for an invalid contract or a `REJECT`, `REPAIR` or `RETIRE` decision. This lets the same policy block CI/CD promotion.
 
+### Re-gate when a model or scope changes
+
+A past approval does not carry over automatically when the underlying model changes or evidence expires. Use `regate` to block promotion until fresh verified evaluation evidence is recorded (all examples below are fictional):
+
+```bash
+# CI guard: fails (exit 1) when the deployed model differs from the approved contract
+node cli.js regate contracts/examples/regate/baseline-model-v1.scale.json --model northstar-plan-v2 --as-of 2026-11-24
+
+# Baseline vs stale candidate: model changed v1 -> v2 without refreshed evaluation (exit 1)
+node cli.js regate \
+  contracts/examples/regate/baseline-model-v1.scale.json \
+  contracts/examples/regate/candidate-model-v2-stale.scale.json \
+  --as-of 2026-11-24
+
+# Baseline vs re-validated candidate: model changed v1 -> v2 with fresh verified evaluation (exit 0)
+node cli.js regate \
+  contracts/examples/regate/baseline-model-v1.scale.json \
+  contracts/examples/regate/candidate-model-v2-revalidated.scale.json \
+  --as-of 2026-11-24
+```
+
+`regate` also supports `--trigger <model|data|workflow|population|integration|cost|risk|autonomy>`, `--as-of YYYY-MM-DD` for expiry checks, and `--json` for machine-readable CI output.
+
 ### Gate your own use case
 
 Start from the starter contract and follow the [10-minute guide](docs/YOUR-FIRST-CONTRACT.md):
@@ -271,7 +294,8 @@ The tests cover:
 - fully loaded economics;
 - SCALE-1 validation, including malformed entries and values that would otherwise be silently coerced (`null` metric values, ratios outside 0–1, negative costs, mistyped control severity or status);
 - local API and database integration, including `400` answers for malformed requests and a server that keeps running after a malformed `Host` header;
-- the CLI exit-code contract used to block CI/CD promotion (`0` for `SCALE`/`CONDITIONAL_SCALE`, `1` for `REPAIR`, `REJECT`, invalid, missing or malformed contracts).
+- the CLI exit-code contract used to block CI/CD promotion (`0` for `SCALE`/`CONDITIONAL_SCALE`, `1` for `REPAIR`, `REJECT`, invalid, missing or malformed contracts);
+- re-gating when a model or scope changes (`scale-gate regate`), including stale or unverified evaluation evidence, evidence expiry, safety or mandatory-control regressions, single-contract `--model` drift guards and CLI flag validation.
 
 ## Repository map
 

@@ -152,6 +152,11 @@ Reference validity windows are:
 
 A date does not replace event-driven review. A new model, data source, workflow, population, integration, cost structure, risk classification or autonomy level should trigger a new gate immediately.
 
+The CLI enforces both time-bound and event-driven re-gating via `scale-gate regate`:
+
+- **Single-contract check** (`scale-gate regate <contract> [--model <id>] [--trigger <kind>] [--as-of YYYY-MM-DD]`): flags expired evidence, declared material triggers, or a target `--model` that does not match the contract's pinned `use_case.model`.
+- **Baseline-vs-candidate check** (`scale-gate regate <baseline> <candidate> [--as-of YYYY-MM-DD]`): detects material changes (model swap, autonomy or risk increase, population expansion, cost jump, workflow change, control or safety regression) and requires verified `evaluation` evidence observed strictly after the baseline before returning `PASS` (exit `0`).
+
 ## Interpretation limits
 
 - A deterministic engine cannot judge whether evidence is truthful.

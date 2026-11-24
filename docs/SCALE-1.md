@@ -35,6 +35,7 @@ Decision context includes:
 
 - `risk_tier` — `low`, `medium`, `high` or `critical`;
 - `autonomy_level` — integer from 0 to 4;
+- `model` (optional) — pinned model identifier string or `{ provider, name, version }` object used by `scale-gate regate` to detect model swaps;
 - pilot and target populations;
 - baseline and treatment task time;
 - task volume;

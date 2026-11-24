@@ -90,3 +90,66 @@ test('help exits 0, unknown command exits 1', () => {
   assert.equal(unknown.code, 1);
   assert.match(unknown.stdout, /Usage:/);
 });
+
+test('regate exits 1 when a model changes without refreshed evaluation evidence', () => {
+  const result = run(
+    'regate',
+    'contracts/examples/regate/baseline-model-v1.scale.json',
+    'contracts/examples/regate/candidate-model-v2-stale.scale.json',
+    '--as-of', '2026-11-24'
+  );
+  assert.equal(result.code, 1);
+  assert.match(result.stdout, /^Re-gate status: REGATE_REQUIRED$/m);
+  assert.match(result.stdout, /Model: northstar-plan-v1 -> northstar-plan-v2/);
+  assert.match(result.stdout, /Required actions:/);
+});
+
+test('regate exits 0 and emits valid --json when a model upgrade is re-validated', () => {
+  const result = run(
+    'regate',
+    'contracts/examples/regate/baseline-model-v1.scale.json',
+    'contracts/examples/regate/candidate-model-v2-revalidated.scale.json',
+    '--as-of', '2026-11-24',
+    '--json'
+  );
+  assert.equal(result.code, 0);
+  const parsed = JSON.parse(result.stdout);
+  assert.equal(parsed.regate_status, 'PASS');
+  assert.equal(parsed.use_case.baseline_model, 'northstar-plan-v1');
+  assert.equal(parsed.use_case.candidate_model, 'northstar-plan-v2');
+  assert.equal(parsed.regate_blockers.length, 0);
+});
+
+test('regate single-contract mode guards against model drift and evidence expiry', () => {
+  const same = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', '--model', 'northstar-plan-v1', '--as-of', '2026-11-24');
+  assert.equal(same.code, 0);
+  assert.match(same.stdout, /^Re-gate status: PASS$/m);
+
+  const changed = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', '--model=northstar-plan-v2', '--as-of=2026-11-24');
+  assert.equal(changed.code, 1);
+  assert.match(changed.stdout, /^Re-gate status: REGATE_REQUIRED$/m);
+
+  const expired = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', '--as-of', '2027-01-10');
+  assert.equal(expired.code, 1);
+  assert.match(expired.stdout, /Evidence has expired/);
+});
+
+test('regate rejects invalid flags, dates, triggers and missing files with exit 1', () => {
+  assert.equal(run('regate', '--help').code, 0);
+
+  const badDate = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', '--as-of', '2026-02-30');
+  assert.equal(badDate.code, 1);
+  assert.match(badDate.stderr, /Invalid --as-of date/);
+
+  const badTrigger = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', '--trigger', 'vibes');
+  assert.equal(badTrigger.code, 1);
+  assert.match(badTrigger.stderr, /Unknown re-gate trigger/);
+
+  const badOpt = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', '--unknown');
+  assert.equal(badOpt.code, 1);
+  assert.match(badOpt.stderr, /Unknown option/);
+
+  const missing = run('regate', 'contracts/examples/regate/baseline-model-v1.scale.json', 'contracts/does-not-exist.scale.json');
+  assert.equal(missing.code, 1);
+  assert.match(missing.stderr, /File not found/);
+});

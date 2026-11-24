@@ -12,6 +12,10 @@ All notable changes to SCALE GATE are listed here. Versions follow [Semantic Ver
 - A control `severity` or `status` outside the SCALE-1 enums (for example `"Critical"` or `"passed"`) is now a validation error. Before, a mistyped `"Critical"` on a failing control skipped the critical-control hard blocker.
 
 ### Added
+- CLI command `scale-gate regate` and engine functions `evaluateRegate` and `detectMaterialChanges` to enforce re-validation when a model changes, scope shifts, or evidence expires. Supports single-contract checks (`--model`, `--trigger`, `--as-of`, `--json`) and baseline-vs-candidate comparison requiring fresh verified `evaluation` evidence after material changes, with exit code `0` on `PASS` and `1` on `REGATE_REQUIRED`.
+- Optional `use_case.model` field (string or `{ provider, name, version }`) in `contracts/scale-1.schema.json` and contract validation.
+- Fictional model-upgrade re-gate examples in `contracts/examples/regate/` (`baseline-model-v1.scale.json`, `candidate-model-v2-stale.scale.json`, `candidate-model-v2-revalidated.scale.json`), documented in `README.md`, `docs/SCALE-1.md` and `docs/METHODOLOGY.md`.
+- 12 engine and CLI tests covering `regate` model swaps, stale/unverified/expired evidence, safety and control regressions, scope triggers and flag validation. Test count goes from 22 to 34.
 - 1 API test covering these client errors and checking the server still answers afterwards. Test count goes from 21 to 22.
 - 5 tests for these cases (engine, CLI and `POST /api/validate` round-trip of an exported contract). Test count goes from 16 to 21.
 - `tests/cli.test.js`: end-to-end tests of the CLI exit-code contract that CI pipelines rely on. Each reference contract is checked for its expected decision and exit code (`SCALE` and `CONDITIONAL_SCALE` exit 0, `REPAIR` and the starter `REJECT` exit 1), plus `--json` output, missing file, malformed JSON, structurally invalid contract, help and unknown command. Test count goes from 6 to 16.

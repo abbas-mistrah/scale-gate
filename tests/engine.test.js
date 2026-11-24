@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { evaluateContract, validateContract, calculateEconomics } = require('../src/engine');
+const { evaluateContract, validateContract, calculateEconomics, evaluateRegate, formatModelId } = require('../src/engine');
 
 function fixture(name) {
   return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'contracts', 'examples', name), 'utf8'));
@@ -98,4 +98,115 @@ test('every shipped contract passes the stricter validation', () => {
   }
   const starter = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'contracts', 'templates', 'starter.scale.json'), 'utf8'));
   assert.deepEqual(validateContract(starter), { valid: true, errors: [] });
+});
+
+function regateFixture(name) {
+  return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'contracts', 'examples', 'regate', name), 'utf8'));
+}
+
+test('all shipped regate examples pass SCALE-1 validation', () => {
+  for (const name of ['baseline-model-v1.scale.json', 'candidate-model-v2-stale.scale.json', 'candidate-model-v2-revalidated.scale.json']) {
+    assert.deepEqual(validateContract(regateFixture(name)), { valid: true, errors: [] }, name);
+  }
+});
+
+test('validateContract accepts string and structured use_case.model and rejects empty ones', () => {
+  const contract = fixture('demand-forecast.scale.json');
+  contract.use_case.model = { provider: 'northstar', name: 'plan', version: '2.1' };
+  assert.equal(validateContract(contract).valid, true);
+  assert.equal(formatModelId(contract), 'northstar/plan@2.1');
+
+  contract.use_case.model = '   ';
+  assert.equal(validateContract(contract).valid, false);
+  assert.ok(validateContract(contract).errors.some(error => error.includes('use_case.model')));
+});
+
+test('regate blocks a model upgrade when evaluation evidence was not refreshed', () => {
+  const baseline = regateFixture('baseline-model-v1.scale.json');
+  const stale = regateFixture('candidate-model-v2-stale.scale.json');
+  const result = evaluateRegate(baseline, { candidate: stale, asOf: '2026-11-24' });
+  assert.equal(result.regate_status, 'REGATE_REQUIRED');
+  assert.ok(result.changes.some(item => item.code === 'model-changed'));
+  assert.ok(result.regate_blockers.some(item => item.code === 'stale-evaluation-evidence'));
+  assert.ok(result.required_actions.some(item => item.includes('northstar-plan-v2')));
+});
+
+test('regate blocks an unverified evaluation entry after a model change', () => {
+  const baseline = regateFixture('baseline-model-v1.scale.json');
+  const candidate = regateFixture('candidate-model-v2-revalidated.scale.json');
+  candidate.evidence = candidate.evidence.map(item => (
+    item.evidence_type === 'evaluation' ? { ...item, verified: false } : item
+  ));
+  const result = evaluateRegate(baseline, { candidate, asOf: '2026-11-24' });
+  assert.equal(result.regate_status, 'REGATE_REQUIRED');
+  assert.ok(result.regate_blockers.some(item => item.code === 'stale-evaluation-evidence'));
+});
+
+test('regate passes a model upgrade backed by fresh verified evaluation evidence', () => {
+  const baseline = regateFixture('baseline-model-v1.scale.json');
+  const revalidated = regateFixture('candidate-model-v2-revalidated.scale.json');
+  const result = evaluateRegate(baseline, { candidate: revalidated, asOf: '2026-11-24' });
+  assert.equal(result.regate_status, 'PASS');
+  assert.equal(result.regate_blockers.length, 0);
+  assert.equal(result.baseline_decision, 'SCALE');
+  assert.equal(result.candidate_decision, 'SCALE');
+  assert.ok(result.changes.some(item => item.code === 'model-changed'));
+  assert.ok(result.delta.first_year_roi > 0);
+  assert.ok(result.delta.cost_per_task < 0);
+});
+
+test('regate blocks safety or mandatory-control regressions even with fresh evaluation dates', () => {
+  const baseline = regateFixture('baseline-model-v1.scale.json');
+  const regressed = regateFixture('candidate-model-v2-revalidated.scale.json');
+  regressed.controls.find(item => item.key === 'fallback').status = 'fail';
+  regressed.metrics.find(item => item.key === 'critical_error_rate').value = 0.019;
+  const result = evaluateRegate(baseline, { candidate: regressed, asOf: '2026-11-24' });
+  assert.equal(result.regate_status, 'REGATE_REQUIRED');
+  assert.ok(result.regate_blockers.some(item => item.code === 'control-regression'));
+  assert.ok(result.regate_blockers.some(item => item.code === 'safety-regression'));
+});
+
+test('regate blocks mismatched slugs, expired evidence, and single-contract model drift', () => {
+  const baseline = regateFixture('baseline-model-v1.scale.json');
+  const other = fixture('contract-review-agent.scale.json');
+  const mismatch = evaluateRegate(baseline, { candidate: other, asOf: '2026-11-24' });
+  assert.equal(mismatch.regate_status, 'REGATE_REQUIRED');
+  assert.ok(mismatch.regate_blockers.some(item => item.code === 'slug-mismatch'));
+
+  const expired = evaluateRegate(baseline, { asOf: '2027-01-10' });
+  assert.equal(expired.regate_status, 'REGATE_REQUIRED');
+  assert.equal(expired.expired_evidence.length, 2);
+  assert.ok(expired.regate_blockers.some(item => item.code === 'evidence-expired'));
+
+  const sameModel = evaluateRegate(baseline, { model: 'northstar-plan-v1', asOf: '2026-11-24' });
+  assert.equal(sameModel.regate_status, 'PASS');
+
+  const driftedModel = evaluateRegate(baseline, { model: 'northstar-plan-v2', asOf: '2026-11-24' });
+  assert.equal(driftedModel.regate_status, 'REGATE_REQUIRED');
+  assert.ok(driftedModel.regate_blockers.some(item => item.code === 'model-change-unrevalidated'));
+});
+
+test('regate detects scope, autonomy, risk, population, cost and explicit trigger changes', () => {
+  const baseline = regateFixture('baseline-model-v1.scale.json');
+  const expanded = regateFixture('baseline-model-v1.scale.json');
+  expanded.use_case.autonomy_level = 3;
+  expanded.use_case.risk_tier = 'high';
+  expanded.use_case.target_users = 300;
+  expanded.use_case.annual_platform_cost = 210000;
+  expanded.use_case.department = 'Global Supply Chain';
+
+  const blocked = evaluateRegate(baseline, { candidate: expanded, triggers: ['data'], asOf: '2026-11-24' });
+  assert.equal(blocked.regate_status, 'REGATE_REQUIRED');
+  const codes = new Set(blocked.changes.map(item => item.code));
+  assert.ok(codes.has('autonomy-increased'));
+  assert.ok(codes.has('risk-tier-increased'));
+  assert.ok(codes.has('population-expanded'));
+  assert.ok(codes.has('cost-increased'));
+  assert.ok(codes.has('workflow-changed'));
+  assert.ok(codes.has('trigger-data'));
+  assert.ok(blocked.regate_blockers.some(item => item.code === 'stale-evaluation-evidence'));
+
+  const singleTrigger = evaluateRegate(baseline, { triggers: ['integration'], asOf: '2026-11-24' });
+  assert.equal(singleTrigger.regate_status, 'REGATE_REQUIRED');
+  assert.ok(singleTrigger.regate_blockers.some(item => item.code === 'trigger-unrevalidated-integration'));
 });
